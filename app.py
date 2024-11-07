@@ -27,3 +27,7 @@ st.markdown("""
 
 # Título y subtítulo de la aplicación
 st.title('LectorManga')
+
+# Barra lateral con información
+with st.sidebar:
+   st.subheader("Aquí podrás escuchar descripciones detalladas del manga que estás leyendo")
