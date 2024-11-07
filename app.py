@@ -41,7 +41,7 @@ def encode_image(image_file):
     return base64.b64encode(image_file.getvalue()).decode("utf-8")
 
 # Carga de archivo de imagen
-uploaded_image = st.file_uploader("Sube una imagen", type=["jpg", "png", "jpeg"])
+uploaded_image = st.file_uploader("Sube una imagen", type=["jpg", "png", "jpeg", "pdf"])
 
 if uploaded_image:
     # Mostrar imagen cargada con expandir
