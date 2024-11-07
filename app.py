@@ -31,3 +31,43 @@ st.title('LectorManga')
 # Barra lateral con información
 with st.sidebar:
    st.subheader("Aquí podrás escuchar descripciones detalladas del manga que estás leyendo")
+
+# Entrada para la clave de API de OpenAI
+ke = st.text_input('Ingresa tu Clave de API de OpenAI', type='password')
+os.environ['OPENAI_API_KEY'] = ke
+
+# Cargar archivo PDF
+pdf = st.file_uploader("Carga el archivo PDF", type="pdf")
+
+# Extraer y procesar el texto del PDF
+if pdf is not None:
+    # Crear un lector de PDF
+    pdf_reader = PdfReader(pdf)
+    text = ""
+    for page in pdf_reader.pages:
+        text += page.extract_text()
+
+    # Dividir el texto en chunks (fragmentos)
+    text_splitter = CharacterTextSplitter(separator="\n", chunk_size=500, chunk_overlap=20, length_function=len)
+    chunks = text_splitter.split_text(text)
+
+    # Crear embeddings a partir de los fragmentos del texto
+    embeddings = OpenAIEmbeddings()
+    knowledge_base = FAISS.from_texts(chunks, embeddings)
+
+    # Mostrar el campo de entrada para las preguntas
+    st.subheader("Escribe lo que quieres saber sobre el documento")
+    user_question = st.text_area(" ")
+
+    if user_question:
+        # Buscar en la base de conocimientos la pregunta del usuario
+        docs = knowledge_base.similarity_search(user_question)
+
+        # Cargar el modelo de lenguaje y realizar la cadena de preguntas y respuestas
+        llm = OpenAI(model_name="gpt-4")
+        chain = load_qa_chain(llm, chain_type="stuff")
+
+        # Mostrar la respuesta
+        with get_openai_callback() as cb:
+            response = chain.run(input_documents=docs, question=user_question)
+            st.write(response)
